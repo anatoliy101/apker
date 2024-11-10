@@ -278,6 +278,9 @@ def main():
         save_keystore = args.save_keystore
         save_logs = args.save_logs
 
+        install_status = "N/A"
+        uninstall_status = "N/A"
+
         print(f"[INFO] APK Path: {apk_path}")
         print(f"[INFO] AndroidManifest Path: {manifest_path}")
         print(f"[INFO] Save Keystore: {'Yes' if save_keystore else 'No'}")
@@ -297,18 +300,10 @@ def main():
             # Validate APK after processing
             is_valid = validate_apk(processed_apk_path)
 
-            if not is_valid:
-                print(f"[WARNING] APK validation failed after processing.")
-                # Try to install and uninstall the unaligned and unsigned APK
-                installed = install_apk(processed_apk_path)
-                install_status = "Success" if installed else "Failed"
-                if installed:
-                    uninstalled = uninstall_apk(package_name)
-                    uninstall_status = "Success" if uninstalled else "Failed"
-                else:
-                    uninstall_status = "N/A"
-            else:
+            if is_valid:
                 print(f"[INFO] APK validation passed after processing.")
+            else:
+                print(f"[INFO] APK validation failed after processing.")
                 # Zipalign APK
                 aligned_apk_path = zipalign_apk(processed_apk_path, temp_dir)
 
@@ -329,22 +324,18 @@ def main():
                 if installed:
                     uninstalled = uninstall_apk(package_name)
                     uninstall_status = "Success" if uninstalled else "Failed"
-                else:
-                    uninstall_status = "N/A"
 
         print("\n" + "=" * 60)
         print("📄 Summary")
         print("=" * 60)
         print(f"[INFO] Input APK: {apk_path}")
         print(f"[INFO] Input AndroidManifest: {manifest_path}")
-        if is_valid:
-            print(f"[INFO] Updated APK: {updated_apk_path}")
-        else:
-            print(f"[INFO] Processed APK (not updated): {processed_apk_path}")
+        print(f"[INFO] Updated APK: {updated_apk_path}")
         print(f"[INFO] APK Validation: {'Passed' if is_valid else 'Failed'}")
         print(f"[INFO] Installation: {install_status}")
         print(f"[INFO] Uninstallation: {uninstall_status}")
-        if save_keystore and is_valid:
+
+        if save_keystore:
             keystore_filename = f"keystore_{package_name}.p12"
             keystore_final_path = os.path.join(apk_dir, keystore_filename)
             print(f"[INFO] Keystore saved as: {keystore_final_path}")
