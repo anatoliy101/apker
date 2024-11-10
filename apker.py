@@ -1,12 +1,12 @@
-import subprocess
-import shutil
 import os
-import sys
-import tempfile
-import argparse
 import re
+import sys
 import random
 import string
+import shutil
+import tempfile
+import argparse
+import subprocess
 from zipfile import ZipFile, ZipInfo
 
 def get_package_name(apk_path):
